@@ -1,15 +1,19 @@
 exports.runProgram = input => {
-  const program = [...input];
+  const program = input
+    .trim()
+    .split(',')
+    .map(op => parseInt(op));
   for (let p = 0; p < program.length; p += 4) {
     const op = program[p];
-    switch (op) {
-      case 1:
-        program[p + 3] = program[p + 1] + program[p + 2];
-      case 2:
-        program[p + 3] = program[p + 1] * program[p + 2];
-      case 99:
-        return program;
+    if (op === 1) {
+      program[program[p + 3]] = program[program[p + 1]] + program[program[p + 2]];
+      continue;
+    } else if (op === 2) {
+      program[program[p + 3]] = program[program[p + 1]] * program[program[p + 2]];
+      continue;
+    } else if (op === 99) {
+      break;
     }
   }
-  return program;
+  return program.join(',');
 };
