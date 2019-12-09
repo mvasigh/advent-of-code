@@ -61,22 +61,25 @@ exports.parseInstructions = (instructions, options = {}) => {
 
 exports.calculateDistance = ([x1, y1], [x2, y2]) => Math.abs(y2 - y1) + Math.abs(x2 - x1);
 
-exports.shortestDistance = lineList => {
-  const [line1, line2] = lineList
-    .trim()
-    .split('\n')
-    .map(instructions => this.parseInstructions(instructions));
+exports.findIntersects = (line1, line2) => {
+  const intersects = line1.reduce((intersects, point, i) => {
+    const j = line2.findIndex(p => point.equals(p));
+    if (j !== -1) {
+      intersects.push({
+        point,
+        distance: this.calculateDistance([0, 0], point),
+        pathLength: i + j + 2
+      });
+    }
+    return intersects;
+  }, []);
+  return intersects;
+};
 
-  const intersects = line1
-    .filter(point => line2.some(p => point.equals(p)))
-    .map(intersect => {
-      const distance = this.calculateDistance([0, 0], intersect);
-      return {
-        point: intersect,
-        distance
-      };
-    })
-
-  const shortest = intersects.reduce((min, intersect) => (intersect.distance < min.distance ? intersect : min));
-  return shortest
+exports.shortestDistance = (line1, line2) => {
+  const intersects = this.findIntersects(line1, line2);
+  const shortest = intersects.reduce((min, intersect) =>
+    intersect.distance < min.distance ? intersect : min
+  );
+  return shortest;
 };
