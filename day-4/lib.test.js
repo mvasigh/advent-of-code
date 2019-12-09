@@ -10,11 +10,6 @@ describe('day 4', () => {
     expect(neverDecreases(1)).toEqual(true);
   });
 
-  // test('allPossible', () => {
-  //   expect(allPossible(111111, 111113)).toHaveLength(3);
-  //   expect(allPossible(111111, 111121)).toHaveLength(9);
-  // }); 
-
   test('isValid', () => {
     expect(isValid(111111)).toBeTruthy();
     expect(isValid(223450)).toBeFalsy();
