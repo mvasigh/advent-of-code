@@ -1,4 +1,4 @@
-const { neverDecreases, allPossible, isValid } = require('./lib');
+const { neverDecreases, matchingDigits, isValid } = require('./lib');
 
 describe('day 4', () => {
   test('neverDecreases', () => {
@@ -11,8 +11,17 @@ describe('day 4', () => {
   });
 
   test('isValid', () => {
-    expect(isValid(111111)).toBeTruthy();
     expect(isValid(223450)).toBeFalsy();
     expect(isValid(123789)).toBeFalsy();
+    expect(isValid(123444)).toBeFalsy();
+    expect(isValid(111122)).toBeTruthy();
+    expect(isValid(112233)).toBeTruthy();
+    expect(isValid(123444)).toBeFalsy();
   });
+
+  test('matchingDigits', () => {
+    expect(matchingDigits('111')).toBeFalsy();
+    expect(matchingDigits('11111')).toBeFalsy();
+    expect(matchingDigits('111122')).toBeTruthy();
+  })
 });
