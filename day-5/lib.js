@@ -1,38 +1,28 @@
-const readline = require('readline');
+const prompt = require('./prompt');
 
 exports.stringify = arr => arr.join(',');
-
-const prompt = question =>
-  new Promise((resolve, reject) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question(question, answer => {
-      const num = parseInt(answer.trim());
-      rl.close();
-      if (Number.isNaN(num)) {
-        reject('Must input a valid integer');
-      } else {
-        resolve(num);
-      }
-    });
-  });
-
-const retrieve = (program, pos, mode = 'position') => program[mode === 'immediate' ? pos : program[pos]];
-
-exports.createProgram = input => {
-  const program = input
-    .trim()
-    .split(',')
-    .map(val => parseInt(val));
-  program.retrieve = retrieve;
-  return program;
-};
 
 const instructions = {
   '01': { length: 4 },
   '02': { length: 4 },
   '03': { length: 2 },
   '04': { length: 2 },
+  '05': { length: 3 },
+  '06': { length: 3 },
+  '07': { length: 4 },
+  '08': { length: 4 },
   '99': { length: 1 }
+};
+
+const retrieve = (program, pos, mode = 'position') =>
+  program[mode === 'immediate' ? pos : program[pos]];
+
+exports.createProgram = input => {
+  const program = input
+    .trim()
+    .split(',')
+    .map(val => parseInt(val));
+  return program;
 };
 
 exports.interpretOp = opcode => {
@@ -50,35 +40,55 @@ exports.interpretOp = opcode => {
   };
 };
 
-// New and improved Intcode computer!
 exports.runProgram = async input => {
-  if (typeof input !== 'string' && !Array.isArray(input)) {
-    throw new Error('Invalid input, must be an Array or a string');
-  }
-
   const program = this.createProgram(input);
-
   let p = 0;
   let active = true;
+
   while (p <= program.length && active) {
     const { op, modes } = this.interpretOp(program[p]);
     const { length } = instructions[op];
-    if (op === '01') {
-      const val =
-        program.retrieve(program, p + 1, modes[0]) + program.retrieve(program, p + 2, modes[1]);
-      program[program[p + 3]] = val;
-    } else if (op === '02') {
-      const val =
-        program.retrieve(program, p + 1, modes[0]) * program.retrieve(program, p + 2, modes[1]);
-      program[program[p + 3]] = val;
-    } else if (op === '03') {
-      const val = await prompt(`Please enter input for position ${p}: `);
-      console.log(`Placing value ${val} at position ${program[p + 1]}`);
-      program[program[p + 1]] = val;
-    } else if (op === '04') {
-      console.log(`Output for position ${p}: ${program.retrieve(program, p + 1, modes[0])}`);
-    } else if (op === '99') {
-      active = false;
+    switch (op) {
+      case '01':
+        program[program[p + 3]] =
+          retrieve(program, p + 1, modes[0]) + retrieve(program, p + 2, modes[1]);
+        break;
+      case '02':
+        program[program[p + 3]] =
+          retrieve(program, p + 1, modes[0]) * retrieve(program, p + 2, modes[1]);
+        break;
+      case '03':
+        const val = await prompt(`Please enter input for position ${p}: `);
+        program[program[p + 1]] = val;
+        break;
+      case '04':
+        console.log(`Output for position ${p}: ${retrieve(program, p + 1, modes[0])}`);
+        break;
+      case '05':
+        if (retrieve(program, p + 1, modes[0])) {
+          p = retrieve(program, p + 2, modes[1]);
+          continue;
+        }
+        break;
+      case '06':
+        if (!retrieve(program, p + 1, modes[0])) {
+          p = retrieve(program, p + 2, modes[1]);
+          continue;
+        }
+        break;
+      case '07':
+        const op07condition =
+          retrieve(program, p + 1, modes[0]) < retrieve(program, p + 2, modes[1]);
+        program[program[p + 3]] = op07condition ? 1 : 0;
+        break;
+      case '08':
+        const op08condition =
+          retrieve(program, p + 1, modes[0]) === retrieve(program, p + 2, modes[1]);
+        program[program[p + 3]] = op08condition ? 1 : 0;
+        break;
+      case '99':
+        active = false;
+        break;
     }
 
     p += length;
