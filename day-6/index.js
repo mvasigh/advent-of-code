@@ -11,6 +11,9 @@ function main() {
   const indirectOrbits = lib.countIndirectOrbits(inputData);
   console.log(`There are ${orbits} total orbits`);
   console.log({ directOrbits, indirectOrbits })
+
+  const transfers = lib.countOrbitalTransfers(inputData, 'YOU', 'SAN');
+  console.log(`There are ${transfers} orbital transfers required between YOU and SAN`)
 }
 
 main();

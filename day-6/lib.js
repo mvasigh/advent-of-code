@@ -29,9 +29,21 @@ exports.traversePaths = (inputData, rootPath = 'COM') => {
   let path = rootPath;
   while ((matches = regex.exec(inputData)) !== null) {
     const { ctr, sat } = matches.groups;
-    const newPath = `-${sat}`
-    paths.push(path + newPath)
-    paths = paths.concat(this.traversePaths(inputData, path + newPath))
+    const newPath = `-${sat}`;
+    paths.push(path + newPath);
+    paths = paths.concat(this.traversePaths(inputData, path + newPath));
   }
   return paths;
+};
+
+exports.countOrbitalTransfers = (inputData, orig, dest) => {
+  const paths = this.traversePaths(inputData);
+  const [origPath, destPath] = [orig, dest].map(str => paths.find(path => path.endsWith(str)));
+  let transferPath;
+  for (let i = 0; i < Math.max(origPath.length, destPath.length); i++) {
+    if (origPath[i] === destPath[i]) continue;
+    transferPath = origPath.slice(i) + '-' + destPath.slice(i);
+    break;
+  }
+  return transferPath.trim().match(/[A-Z0-9]{1,3}/g).length - 2;
 };
