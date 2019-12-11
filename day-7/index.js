@@ -6,7 +6,7 @@ const filePath = path.resolve(__dirname, 'input.txt');
 
 async function main() {
   const inputData = fs.readFileSync(filePath, 'utf-8');
-  const max = await lib.maxThrusterSignal(inputData, [0, 1, 2, 3, 4]);
+  const max = await lib.maxThrusterSignal(inputData, [5, 6, 7, 8, 9]);
   console.log(`The maximum possible thruster signal is ${max}`);
 }
 

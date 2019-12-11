@@ -44,7 +44,10 @@ exports.createProgram = input => {
   return program;
 };
 
-exports.createComputer = ({ onInput, onOutput }) => async input => {
+exports.createComputer = ({ onInput, onOutput, onHalt }) => async input => {
+  if (!onInput) {
+    throw new Error('Must provide an "onInput" hook to "createComputer"');
+  }
   const program = this.createProgram(input);
   let p = 0;
   let active = true;
@@ -66,7 +69,7 @@ exports.createComputer = ({ onInput, onOutput }) => async input => {
         program[program[p + 1]] = val;
         break;
       case '04':
-        onOutput(retrieve(program, p + 1, modes[0]));
+        onOutput && onOutput(retrieve(program, p + 1, modes[0]));
         break;
       case '05':
         if (retrieve(program, p + 1, modes[0])) {
@@ -92,6 +95,7 @@ exports.createComputer = ({ onInput, onOutput }) => async input => {
         break;
       case '99':
         active = false;
+        onHalt && onHalt(p);
         break;
     }
 
@@ -128,14 +132,14 @@ exports.getAllCombinations = sequence => {
   let combos = [];
   for (let i = 0; i < _sequence.length; i++) {
     const term = _sequence[i];
-    const copy = [..._sequence]
+    const copy = [..._sequence];
     copy.splice(i, 1);
-    combos = combos.concat(this.getAllCombinations(copy).map(el => [term].concat(el)))
+    combos = combos.concat(this.getAllCombinations(copy).map(el => [term].concat(el)));
   }
   return combos;
-}
+};
 
-exports.maxThrusterSignal = async (inputData, sequence) => {
+exports.thrusterSeries = async (inputData, sequence) => {
   const combinations = this.getAllCombinations(sequence);
   let max = 0;
   let seq;
@@ -147,4 +151,17 @@ exports.maxThrusterSignal = async (inputData, sequence) => {
     }
   }
   return max;
+};
+
+exports.thrusterFeedback = async (inputData, sequence) => {
+  // Feedback loop version here
+  // Oh shit! I need to keep state
 }
+
+exports.maxThrusterSignal = async (inputData, sequence, mode = 'series') => {
+  switch(mode) {
+    case 'series':
+    default:
+      return this.thrusterSeries(inputData, sequence);
+  }
+};
