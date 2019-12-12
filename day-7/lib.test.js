@@ -15,7 +15,7 @@ const runProgram = createComputer({
   onOutput: console.log
 });
 
-describe('day 6', () => {
+describe('day 7', () => {
   const basicPrograms = [
     { input: '1,0,0,0,99', output: '2,0,0,0,99' },
     { input: '2,3,0,3,99', output: '2,3,0,6,99' },
