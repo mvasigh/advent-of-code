@@ -6,7 +6,9 @@ const filePath = path.resolve(__dirname, 'input.txt');
 
 function main() {
   const inputData = fs.readFileSync(filePath, 'utf-8');
-  lib.verifyImage(inputData);
+  const decoded = lib.decodeImage(inputData, [25, 6])
+  console.log('The decoded image:')
+  console.log(decoded)
 }
 
 main();

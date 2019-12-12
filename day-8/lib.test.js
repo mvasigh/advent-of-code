@@ -11,4 +11,12 @@ describe('day 8', () => {
       expect(layerData[i]).toEqual(expected[i]);
     }
   });
+
+  test('decodeImage', () => {
+    const testData = '0222112222120000';
+    const dimensions = [2, 2];
+    const expected = '01\n10\n';
+    const decoded = lib.decodeImage(testData, dimensions);
+    expect(decoded).toEqual(expected);
+  })
 });
