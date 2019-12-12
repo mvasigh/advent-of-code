@@ -1,3 +1,5 @@
+const IntcodeVM = require('./IntcodeVM');
+
 exports.stringify = arr => arr.join(',');
 
 const instructions = {
@@ -153,13 +155,58 @@ exports.thrusterSeries = async (inputData, sequence) => {
   return max;
 };
 
-exports.thrusterFeedback = async (inputData, sequence) => {
-  // Feedback loop version here
-  // Oh shit! I need to keep state
-}
+exports.getThrusterSignalFeedback = (inputData, sequence) => {
+  let computers = Array(sequence.length)
+    .fill(null)
+    .map(() => new IntcodeVM(inputData));
+  let output = Array(sequence.length).fill(null);
+  output[output.length - 1] = 0;
+  let iteration = 0;
+  
+  for (let c = 0; c < computers.length; c++) {
+    const computer = computers[c];
+    computer.input = sequence[c];
+    computer.run();
+  }
+  
+  let i = 0;
+  while (i < sequence.length) {
+    const computer = computers[i];
+    computer.input = i === 0 ? output[output.length - 1] : output[i - 1];
+    computer.run();
+    output[i] = computer.output;
+    if (i === sequence.length - 1) {
+      iteration++;
+      if (computer.halted && iteration > 1) {
+        break;
+      } else {
+        i = 0;
+        continue;
+      }
+    }
+    i++;
+  }
 
-exports.maxThrusterSignal = async (inputData, sequence, mode = 'series') => {
-  switch(mode) {
+  return output[output.length - 1];
+};
+
+exports.thrusterFeedback = (inputData, sequence) => {
+  const combinations = this.getAllCombinations(sequence);
+  let max = 0;
+  for (let phaseSeq of combinations) {
+    const thrusterSignal = this.getThrusterSignalFeedback(inputData, phaseSeq);
+    if (thrusterSignal > max) {
+      seq = phaseSeq;
+      max = thrusterSignal;
+    }
+  }
+  return max;
+};
+
+exports.maxThrusterSignal = (inputData, sequence, mode = 'series') => {
+  switch (mode) {
+    case 'feedback':
+      return this.thrusterFeedback(inputData, sequence);
     case 'series':
     default:
       return this.thrusterSeries(inputData, sequence);

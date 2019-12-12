@@ -4,10 +4,12 @@ class IntcodeVM {
     this.active = false;
     this.input = null;
     this.output = null;
+    this.halted = null;
     this.program = this.createProgram(inputData);
 
     this.set = this.set.bind(this);
     this.retrieve = this.retrieve.bind(this);
+    this.run = this.run.bind(this);
     this.toString = this.toString.bind(this);
   }
 
@@ -37,9 +39,12 @@ class IntcodeVM {
       case '03':
       case '04':
         length = 2;
+        break
       case '99':
-      default:
         length = 1;
+        break
+      default:
+        throw new Error(`Unexpected op ${op} with opcode ${opcode}`)
     }
 
     return {
@@ -79,16 +84,16 @@ class IntcodeVM {
           this.set(p + 3, this.retrieve(p + 1, modes[0]) * this.retrieve(p + 2, modes[1]));
           break;
         case '03':
-          if (!this.input) {
+          if (this.input == null) {
             this.active = false;
-            console.log(`No input found. Please set input before running the program again.`);
-            return this.p;
+            continue;
           }
           this.set(p + 1, this.input);
           this.input = null;
           break;
         case '04':
           this.output = this.retrieve(p + 1, modes[0]);
+          this.active = false;
           break;
         case '05':
           if (this.retrieve(p + 1, modes[0])) {
@@ -112,6 +117,7 @@ class IntcodeVM {
           break;
         case '99':
           this.active = false;
+          this.halted = true;
           break;
       }
       this.p += length;

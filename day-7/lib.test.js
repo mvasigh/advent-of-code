@@ -3,6 +3,7 @@ const {
   stringify,
   interpretOp,
   getThrusterSignal,
+  getThrusterSignalFeedback,
   maxThrusterSignal,
   getAllCombinations,
   sort
@@ -145,5 +146,20 @@ describe('day 6', () => {
         expect(computer.toString()).toEqual(program.output);
       }
     });
+
+    test('getThrusterSignalFeedback', () => {
+      for (let td of testDataFeedback) {
+        const output = getThrusterSignalFeedback(td.inputData, td.phaseSequence);
+        expect(output).toEqual(td.expected);
+      }
+    })
+
+    test('maxThrusterSignal - feedback', () => {
+      const sequence = [5, 6, 7, 8, 9];
+      for (let td of testDataFeedback) {
+        const output = maxThrusterSignal(td.inputData, sequence, 'feedback');
+        expect(output).toEqual(td.expected);
+      }
+    })
   });
 });
