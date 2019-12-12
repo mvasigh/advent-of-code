@@ -6,10 +6,9 @@ const filePath = path.resolve(__dirname, 'input.txt');
 
 function main() {
   const input = fs.readFileSync(filePath, 'utf-8');
-  const computer = new IntcodeVM(input, { log: true })
-  computer.input = 1;
+  const computer = new IntcodeVM(input, { log: true });
+  computer.input = 2;
   computer.run();
-
 }
 
 main();
