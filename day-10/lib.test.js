@@ -26,7 +26,7 @@ describe('day 10', () => {
     });
 
     test('maxAsteroids', () => {
-      expect(lib.maxAsteroids(testData)).toEqual(8)
+      expect(lib.maxAsteroids(testData).num).toEqual(8)
     })
   });
 
@@ -98,8 +98,20 @@ describe('day 10', () => {
 
     test('maxAsteroids', () => {
       for (let td of testData) {
-        expect(lib.maxAsteroids(td.input)).toEqual(td.expected)
+        expect(lib.maxAsteroids(td.input).num).toEqual(td.expected)
       }
+    });
+
+    test('laserHitNumber', () => {
+      const td = testData[testData.length - 1];
+      const hitCoords = lib.laserHitNumber(td.input, [11, 13], 500);
+      expect(hitCoords[0].coords).toEqual([11, 12])
+      expect(hitCoords[1].coords).toEqual([12, 1])
+      expect(hitCoords[9].coords).toEqual([12, 8])
+      expect(hitCoords[19].coords).toEqual([16, 0])
+      expect(hitCoords[49].coords).toEqual([16, 9])
+      expect(hitCoords[99].coords).toEqual([10, 16])
+      expect(hitCoords[198].coords).toEqual([9, 6])
     })
   })
 });

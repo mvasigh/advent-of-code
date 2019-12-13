@@ -1,15 +1,32 @@
 const asteroidRegex = /#/g;
-const toRad = deg => (deg * Math.PI) / 180;
+
 const getOffset = (dx, dy) => {
+  // rotated by Math.PI / 2 so 0 is facing up
   if (dx > 0 && dy < 0) {
-    return 0;
-  } else if (dx < 0 && dy < 0) {
-    return Math.PI / 2;
-  } else if (dx < 0 && dy > 0) {
-    return Math.PI;
-  } else if (dx > 0 && dy > 0) {
     return (3 * Math.PI) / 2;
+  } else if (dx < 0 && dy < 0) {
+    return 0;
+  } else if (dx < 0 && dy > 0) {
+    return Math.PI / 2;
+  } else if (dx > 0 && dy > 0) {
+    return Math.PI;
   }
+};
+
+const sort = asteroids => {
+  const _asteroids = [...asteroids];
+  _asteroids.sort((a, b) => {
+    let _aAngle = a.angle === 0 ? 999 : a.angle;
+    let _bAngle = b.angle === 0 ? 999 : b.angle;
+    if (_aAngle < _bAngle) {
+      return 1;
+    } else if (_aAngle > _bAngle) {
+      return -1;
+    } else {
+      return a.distance > b.distance ? 1 : -1;
+    }
+  });
+  return _asteroids;
 };
 
 exports.createGrid = inputData =>
@@ -18,34 +35,46 @@ exports.createGrid = inputData =>
     .split('\n')
     .map(row => row.trim());
 
-exports.visibleAsteroids = (grid, [ax, ay]) => {
-  if (grid[ay][ax] !== '#') return 0;
-  const w = grid[0].length,
-    h = grid.length;
-
+exports.relativeAsteroids = (grid, [ax, ay]) => {
+  if (grid[ay][ax] !== '#') return [];
+  const h = grid.length;
   let matches;
   let x;
-  let angles = new Set();
+  let asteroids = [];
   for (let y = 0; y < h; y++) {
     while ((matches = asteroidRegex.exec(grid[y])) !== null) {
       x = matches.index;
       if (ax === x && ay === y) continue;
       let angle;
+      let dx = x - ax;
+      let dy = y - ay;
       if (ay === y) {
-        angle = x > ax ? 0 : Math.PI;
+        // rotated to accomodate laser
+        angle = x > ax ? (3 * Math.PI) / 2 : Math.PI / 2;
       } else if (ax === x) {
-        angle = y > ay ? (3 * Math.PI) / 2 : Math.PI / 2;
+        angle = y > ay ? Math.PI : 0;
       } else {
-        let dx = x - ax;
-        let dy = y - ay;
         let offset = getOffset(dx, dy);
-        angle = Math.atan(Math.abs(dy) / Math.abs(dx)) + offset;
+        let o = (dx > 0 && dy < 0) || (dx < 0 && dy > 0) ? dy : dx;
+        let a = (dx > 0 && dy < 0) || (dx < 0 && dy > 0) ? dx : dy;
+        angle = Math.atan(Math.abs(o) / Math.abs(a)) + offset;
       }
-      angles.add(angle);
+      asteroids.push(
+        JSON.stringify({
+          coords: [x, y],
+          distance: Math.abs(dx) + Math.abs(dy),
+          angle
+        })
+      );
     }
   }
+  return asteroids.sort();
+};
 
-  return angles.size;
+exports.visibleAsteroids = (grid, [ax, ay]) => {
+  const asteroids = this.relativeAsteroids(grid, [ax, ay]);
+  const angles = asteroids.map(a => JSON.parse(a).angle);
+  return new Set(angles).size;
 };
 
 exports.maxAsteroids = inputData => {
@@ -55,11 +84,30 @@ exports.maxAsteroids = inputData => {
     for (let x = 0; x < row.length; x++) {
       const visible = this.visibleAsteroids(grid, [x, y]);
       if (visible > max) {
-        maxCoords = [x, y]
+        maxCoords = [x, y];
         max = visible;
       }
     }
     return max;
   }, 0);
-  return maxNum;
+  return { num: maxNum, coords: maxCoords };
+};
+
+exports.laserHitNumber = (inputData, origin, hitNumber = 200) => {
+  const grid = this.createGrid(inputData);
+  const relAsteroids = this.relativeAsteroids(grid, origin).map(a => JSON.parse(a));
+  const asteroids = sort(relAsteroids);
+  let hits = [];
+  let i = 0;
+  let iter = 0;
+  while (hits.length < hitNumber && iter < 9999) {
+    let lastHit = hits[hits.length - 1];
+    const asteroid = asteroids[i];
+    if (!lastHit || asteroid.angle !== lastHit.angle) {
+      hits.push(asteroid)
+    }
+    i = i === asteroids.length - 1 ? 0 : i + 1;
+    iter++;
+  }
+  return hits;
 };
