@@ -16,7 +16,7 @@ exports.turn = (orientation, direction) => {
   return _orientation;
 };
 
-exports.deployRobot = inputData => {
+exports.deployRobot = (inputData, initial = 0) => {
   let x = 0,
     y = 0;
   let orientation = '^';
@@ -24,7 +24,7 @@ exports.deployRobot = inputData => {
   const computer = new IntcodeVM(inputData);
   while (!computer.halted) {
     const key = JSON.stringify([x, y])
-    computer.input = hull.get(key) || 0;
+    computer.input = hull.get(key) || initial;
     computer.run();
     hull.set(key, computer.output);
     computer.run();
@@ -35,3 +35,20 @@ exports.deployRobot = inputData => {
   }
   return hull;
 };
+
+exports.paintHull = hull => {
+  const block = '█'
+  const centerX = 100;
+  const centerY = 100;
+  let grid = Array(200).fill(null).map(() => '.'.repeat(200));
+  for (let tile of hull) {
+    let [coords, color] = tile;
+    let [x, y] = JSON.parse(coords);
+    const output = color === 1 ? block : ' ' 
+    let row = grid[centerY + y].split('');
+    row[centerX + x] = output;
+    grid[centerY + y] = row.join('');
+  }
+  const str = grid.join('\n')
+  console.log(str)
+}
