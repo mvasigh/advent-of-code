@@ -1,5 +1,6 @@
 const fs = require('fs');
 const { getTotalFuel } = require('./lib');
+const run = require('../util/run')
 
 function main() {
   const input = fs.readFileSync('./input.txt', 'utf-8');
@@ -11,4 +12,4 @@ function main() {
   console.log(`Total fuel required: ${totalFuel}`);
 }
 
-main();
+run(main)
