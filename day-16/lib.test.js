@@ -55,4 +55,10 @@ describe('day 16', () => {
     const output = lib.calcFFT(td.input, td.phases, 5);
     expect(td.expected.endsWith(output)).toBeTruthy();
   })
+
+  test('calcLargeFFT - offset', () => {
+    const td = testData[0]
+    const output = lib.calcLargeFFT(td.input, td.phases, Math.ceil(td.input.length / 2));
+    expect(output).toBeTruthy();
+  })
 });

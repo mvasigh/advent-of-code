@@ -46,11 +46,10 @@ exports.calcFFT = (inputData, phases, offset = 0) => {
   let output = null;
   let c = 0;
   if (offset > inputData.length / 2) {
-    c = Math.ceil(input.length / 2);
+    c = offset;
     input = input.slice(c);
   }
   for (let p = 0; p < phases; p++) {
-    console.log(`Running phase ${p}`);
     input = output || input;
     output = '';
     for (c = 0; c < input.length; c++) {
@@ -58,4 +57,22 @@ exports.calcFFT = (inputData, phases, offset = 0) => {
     }
   }
   return output.slice(offset, offset + 8);
+};
+
+exports.calcLargeFFT = (inputData, phases, offset) => {
+  let input = inputData.trim()
+  let output = null;
+  for (let p = 0; p < phases; p++) {
+    input = output ? output.slice() : input;
+    output = [...input];
+    for (let c = output.length - 1; c >= 0; c--) {
+      let sum = (output[c + 1] ? parseInt(output[c + 1]) : 0) + parseInt(input[c]);
+      if (Number.isNaN(sum)) {
+        throw new Error('sum is not a number')
+      }
+      output[c] = Math.abs(sum % 10);
+    }
+    output = output.join('');
+  }
+  return output;
 };
