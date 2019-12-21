@@ -1,41 +1,61 @@
 const basePattern = [0, 1, 0, -1];
 
-exports.patternAtIndex = (pos = 0) =>
-  basePattern
-    .reduce((acc, el) => acc.concat(Array(pos + 1).fill(el)), [])
-    .concat(basePattern[0])
-    .slice(1);
+exports.patternAtIndex = (pos = 0, maxLength = null) => {
+  if (!maxLength) {
+    return basePattern
+      .reduce((acc, el) => acc.concat(Array(pos + 1).fill(el)), [])
+      .concat(basePattern[0])
+      .slice(1);
+  } else {
+    let pattern = Array(maxLength);
+    let p = 0;
+    let i = 0;
+    let index = 0;
+    while (index < maxLength + 1) {
+      const multi = basePattern[i];
+      if (multi) {
+        pattern[index - 1] = multi;
+      }
+      index++;
+      p++;
+      if (p > pos) {
+        p = 0;
+        i++;
+      }
+      if (i === basePattern.length) {
+        i = 0;
+      }
+    }
+    return pattern;
+  }
+};
 
 exports.calcDigit = (input, pos) => {
-  let pattern = this.patternAtIndex(pos);
-  while (pattern.length < input.length) {
-    pattern = pattern.concat(pattern);
-  }
-  const nonzeroes = pattern.slice(0, input.length).reduce(
-    (acc, val, i) =>
-      val
-        ? {
-            ...acc,
-            [i]: val
-          }
-        : acc,
-    {}
-  );
+  let pattern = this.patternAtIndex(pos, input.length);
 
   return Math.abs(
-    Object.entries(nonzeroes).reduce((output, [i, multi]) => {
-      return output + parseInt(input[i]) * multi;
+    Object.entries(pattern).reduce((output, [i, multi]) => {
+      const index = parseInt(i);
+      return output + input[index] * multi;
     }, 0) % 10
   );
 };
 
-exports.calcFFT = (input, phases) => {
-  input = input.trim();
-  let output = [...input];
-  for (let p = 0; p < phases; p++) {
-    console.log(`Running phase ${p}`)
-    const _input = output.join('');
-    output = output.map((_, i) => this.calcDigit(_input, i));
+exports.calcFFT = (inputData, phases, offset = 0) => {
+  let input = inputData.trim();
+  let output = null;
+  let c = 0;
+  if (offset > inputData.length / 2) {
+    c = Math.ceil(input.length / 2);
+    input = input.slice(c);
   }
-  return output.join('');
+  for (let p = 0; p < phases; p++) {
+    console.log(`Running phase ${p}`);
+    input = output || input;
+    output = '';
+    for (c = 0; c < input.length; c++) {
+      output += this.calcDigit(input, c);
+    }
+  }
+  return output.slice(offset, offset + 8);
 };
