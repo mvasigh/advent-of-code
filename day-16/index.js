@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const lib = require('./lib');
+const run = require('../util/run')
 
 const filePath = path.resolve(__dirname, 'input.txt');
 
@@ -10,4 +11,4 @@ function main() {
   console.log(`The first 8 digits of the output are ${output.slice(0, 8)}`)
 }
 
-main()
+run(main)
